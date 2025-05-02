@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Otp extends Model
 {
     //
-    protected $filable = [
+    protected $fillable = [
         'code',
         'user_id',
         'expires_at',
         'is_used',
     ];
+    
 
    public function user()
     {

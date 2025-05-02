@@ -4,7 +4,8 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use OtpService;
+use App\Services\OtpService;
+use Illuminate\Support\Facades\Hash;
 
 class AuthService{
 
@@ -22,27 +23,36 @@ public function registerUser($data){
     ]);
     return $user;
 }
-Public function loginUser($data){
-    $user = Auth::user();
-    if (!$user) {
-        throw new \Exception('Invalid credentials', 401);
-    }
-    $credentials = $data->only('email', 'password');
-    if (Auth::attempt($credentials)) {
+    public function loginUser($data)
+    {
+        $credentials = [
+            'email' => $data['email'],
+            'password' => $data['password'],
+        ];
+        
+
+        // Recherche de l'utilisateur par email
+        $user = User::where('email', $credentials['email'])->first();
+
+        // Vérification de l'utilisateur et du mot de passe
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+            throw new \Exception('Identifiants invalides', 401);
+        }
+
         $user = Auth::user();
-        $otp = $this->otpService->generateOtp();
+
+        // Génération du code OTP
+        $otp = $this->otpService->generateOtp(); // passe l'utilisateur si nécessaire
+
+        // Création du token d'accès
         $token = $user->createToken('auth_token')->plainTextToken;
+
         return [
             'user' => $user,
             'token' => $token,
-            'otp' => $otp->code,
-            'expires_at' => $otp->expires_at,
         ];
-    } else {
-        throw new \Exception('Invalid credentials', 401);
     }
 
-}
 
 
 }

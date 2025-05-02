@@ -1,5 +1,5 @@
 <?php
-
+namespace App\Services;
 use App\Models\Otp;
 use App\Models\User;
 use App\Notifications\SendOtpNotification;
@@ -14,7 +14,8 @@ class OtpService{
 
     public function generateOtp(){
         $user = Auth::user();
-        $code = random_int(1000000,999999);
+        $code = random_int(100000, 999999);
+
         $otp = Otp::create([
             'code'=> $code,
             'expires_at' => now()->addMinutes(3),

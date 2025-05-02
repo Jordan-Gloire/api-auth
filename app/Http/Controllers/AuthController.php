@@ -29,16 +29,27 @@ class AuthController extends Controller
     public function login(LoginRequest $request){
         $data = $request->validated();
         $user = $this->authService->loginUser($data);
+        
         return response()->json([
             'message' => 'User logged in successfully',
-            'user' => $user,
+            'user' => $user['user'],
             'token' => $user['token'],
-            'otp' => $user['otp'],
-            'expires_at' => $user['expires_at'],
         ], 200);
+        
+        
     }
+
+
+
+
+
     public function logout(){
-        $user = $request->user();
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not authenticated',
+            ], 401);
+        }
         $user->tokens()->delete();
         return response()->json([
             'message' => 'User logged out successfully',
